@@ -1,0 +1,138 @@
+body {
+    background-color: black;
+    color: white;
+    font-family: cursive;
+
+    background: url(img/tome3.png) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+a {
+    color: white;
+}
+
+.main_container {
+    max-width: 1150px;
+    margin: auto;
+    background: rgba(0, 0, 0, 0.96);
+    min-height: 100%;
+    padding: 12px;
+}
+
+h1 {
+    width: 100%;
+    text-align: center;
+}
+
+#stattable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+#stattable th {
+    width: 50%;
+    border: 1px solid #333;
+    font-weight: normal;
+    vertical-align: top;
+}
+#stattable td {
+    width: 50%;
+    border: 1px solid #333;
+    vertical-align: top;
+}
+
+.potion_div {
+    border: 2px solid silver;
+    background-color: #333;
+    padding: 5px;
+    height: 145px;
+    width: 240px;
+    white-space: nowrap;
+    
+}
+
+#eventlogcontainer {
+    min-height: 110px;
+}
+
+.label-red {
+    color: #f00;
+}
+.label-green {
+    color: #0f0;
+}
+.label-yellow {
+    color: #F4C430;
+}
+
+.potion_icon {
+    border: 2px solid silver;
+}
+
+.potion_acquired {
+    border-color: #0f0;
+    background-color: #030;
+}
+
+.potion_acquired .potion_icon {
+    border-color: #0f0;
+}
+
+.potion_skipped {
+    border-color: #f00;
+    background-color: #300;
+}
+
+.potion_skipped .potion_icon {
+    border-color: #f00;
+}
+
+.potion_focused {
+    border-color: #F4C430;
+    background-color: #3D310C;
+}
+
+.potion_focused .potion_icon {
+    border-color: #F4C430;
+}
+
+.btn {
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    height: 24px;
+}
+
+.btn-action {
+    width: 60px;
+}
+
+.btn-green {
+    background-color: #3d8b3f;
+}
+
+.btn-green:hover {
+    background-color: #002501; 
+}
+
+.btn-blue {
+    background-color: rgb(0, 140, 186);
+}
+
+.btn-blue:hover {
+    background-color: rgb(0, 35, 47);;
+}
+
+.btn-red {
+    background-color: #8b3d3f;
+}
+
+.btn-red:hover {
+    background-color: #250001;
+}

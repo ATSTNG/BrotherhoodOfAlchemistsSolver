@@ -1,0 +1,219 @@
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="main.css">
+    <title>Brotherhood of Alchemists Solver</title>
+</head>
+
+<body>
+
+<div class="main_container">
+
+<h1>Brotherhood of Alchemists Solver</h1>
+
+<div>
+    <a target="_blank" href="https://te4.org/wiki/Brotherhood_of_Alchemists">&laquo;Brotherhood of Alchemists&raquo;</a> 
+    quest solver for &laquo;Tales of Maj'Eyal&raquo;, &laquo;Age of Ascendancy&raquo; campaign.<br>
+    Used to suggest strategy and predict chances based on player-evaluated value of each elixir.
+</div>
+
+<div id="expanddesccontainer" style="margin: 5px;">
+    <button id="expanddescbtn" class="btn btn-blue" onclick="">EXPAND FULL INFORMATION AND HOWTO</button>
+</div>
+
+<div id="fulldesccontainer" style="display: none;">
+    <p><span class="label-yellow">General information.</span>
+        <a target="_blank" href="https://te4.org/wiki/Brotherhood_of_Alchemists">&laquo;Brotherhood of Alchemists&raquo;</a> is the quest in 
+        &laquo;Age of Ascendancy&raquo; campaign, in &laquo;Tales of Maj'Eyal&raquo; game.
+        Four alchemists around Maj'Eyal are competing to gain entry into the great Brotherhood of Alchemists, 
+        and are offering powerful rewards to any adventurer who assists them in their quest.
+        To achieve this alchemist has to complete 3 unique elixirs (fixed to each alchemist).
+        Each elixir requires 3 unique monster parts (randomly chosen at start of the campaign) to be completed.
+        Player will automaticly collect monster parts and can give them to alchemists to help completing elixirs.
+        Every completed elixir will be awarded to the player. Elixirs can be consumed to gain permanent bonuses.
+        Each time player helps completing an elixir another randomly equiprobably chosen alchemist finishes 
+        randomly equiprobably chosen elixir which is not finished yet.
+        When any of the alchemists finishes all of his three elixirs he earns the entry to the Brotherhood
+        and quest finishes. All other elixirs that are not finished yet are cancelled.
+        If the player helps to finish the last elixir (third elixir for an alchemist) he also receives the final reward
+        from the alchemist that earned the entry. Final reward is also fixed for each alchemist.
+    </p>
+
+    <p>
+        With such set of rules this quest has significant complexity: it has <span class="label-yellow">129.865</span> different states, 
+        <span class="label-yellow">10.348.992</span> possible routes and <span class="label-yellow">5.071</span> different outcomes for the player.
+        These numbers does not consider randomized monster parts.
+        This makes it pretty complicated to analyze precisely without additional tools.
+        This solver is intended to help analyzing this quest and building strategies for it.
+        
+    </p>
+
+    <p><span class="label-yellow">How to use.</span>
+        The elixir/alchemists table below is the main part of this tool.
+        It will contain information about reward items, benefits they provide, current value for player (for you),
+        current status or chance to get, choice suggestion based on different strategies.
+
+        <ol>
+            <li>
+                Assign value for each of 16 different reward items.
+                In other words decide how valueable for your character this item is, how much would you like to get it.
+                The higher the value, the more likely it is to get the reward.
+                You can use any floating point numbers as values, but it is recommended to use integer numbers from range [0; 10000].
+                Use zero if you do not need an item.
+            </li>
+            <li>
+                Observe the chances to get items, strategy recommendations and try selecting different strategies to predict chances with.
+                You can read more about strategies below.
+                You can hover over any item to see recalculated chances for the next step (that you will get after taking or skipping the item).
+            </li>
+            <li>
+                Every time you help an alchemist to complete an elixir use 
+                <button class="btn btn-green">GET</button> <button class="btn btn-red">SKIP</button> buttons on the elixir you got 
+                and the elixir that is randomly completed without your help.
+                After doing this event log, chances, results and strategies will be adjusted to current state of the quest.
+                At any time you can change item values for player and used strategy, all other values and chances will be recalculated.
+                At any time you can roll back your decisions in this tool with 
+                <button class="btn btn-blue">CANCEL LAST</button> button. 
+            </li>
+            <li>
+                You can save current information in this tool for future or share it with other people by using
+                 <button class="btn btn-blue">COPY LINK TO CURRENT STATE</button> button. All information will be stored in the copied link.
+            </li>
+
+        </ol>
+
+        This tool does NOT consider strategies for collecting monster parts, it will simply assume that player already has every monster part
+        needed or will be able get them.
+    </p>
+
+    <p><span class="label-yellow">Optimal strategy.</span>
+        Optimal strategy will attempt to maximize <a target="_blank" href="https://en.wikipedia.org/wiki/Expected_value">expected value</a> 
+        that player will get throughout completing the quest. It will balance risks and rewards to maximize the value you get on average.
+        This is the default strategy and it is recommended to follow it in most cases.
+    </p>
+
+    <p><span class="label-yellow">Safest strategy.</span>
+        Safest startegy will assume that player will get the worst random outcomes.
+        It will attempt to maximize the value that player is guaranteed to get.
+        It will also try to improve the result if it is possible without risks to guaranteed minimum.
+        In cases when multiple choices will lead to the same guaranteed minimum with the same chance this startegy will fall back to optimal startegy to break ties.
+    </p>
+
+    <p><span class="label-yellow">Gamble maximum strategy.</span>
+        Gamble maximum startegy will take extra risks and attempt to get maximum value that is still possible to get.
+        It will also try to maximize the chance to get maximum value if possible.
+        In cases when multiple choices will lead to the same maximum with the same chance this startegy will fall back to optimal startegy to break ties.
+    </p>
+    
+    <p><span class="label-yellow">Implementation details.</span>
+        Main predicting model is dynamic programming over all possible states. Each state holds one bit of information about each of 12 elixirs (completed/not completed) 
+        and the number of locked alchemist (or absence of one), which is the last alchemist that player decided help to,
+        which is also the number of final reward for finished states.
+        Each state stores one result object per startegy.
+        Total number of states computed on recalculation currently is <span class="label-yellow">10.240</span>, however not all of them are reachable.
+        Recalculation only runs upon changing item player values and does not upon hovering items, adding nor cancelling events.
+    </p>
+    <p>
+        When multiple items have the same value left-most top-most items in the table will have priority.
+        Visually probabilities are rounded to 10<sup>-4</sup> precision, value numbers are rounded to 10<sup>-3</sup> precision.
+        Internally floating point values are compared with 10<sup>-7</sup> precision.
+    </p>
+    <p>
+        Implemented in JavaScript to be accessible within the web page.
+        Additional constants (states, routes, outcomes) were computed in C++ with more expensive dynamic programming that allows 3 possible states per elixir.
+    </p>
+    
+    <p>Last updated at <span class="label-yellow">25 July 2023</span>, consistent with ToME version <span class="label-yellow">1.7.6</span></p>
+</div>
+
+<table id="stattable">
+    <tr>
+        <th>Strategy & Results</th>
+        <th>Event log</th>
+    </tr>
+
+    <tr>
+        <td>
+            <div class="label-green"> Acquired items: <span id="labelacquireditems">2</span></div>
+            <div class="label-green"> Acquired value: <span id="labelacquiredvalue">234</span></div>
+
+            <div id="strategyinfocontainer">
+                <div>Optimal strategy: average expected value is <span id="labelaverageexpectedvalue" class="label-green">234</span></div>
+                <div>
+                    Safest strategy: min guaranteed value is <span id="labelminguaranteedvalue" class="label-green">234</span> 
+                    (<span id="labelminbetterchance">60.45%</span> to get more)
+                </div>
+                <div>
+                    Gamble maximum strategy: <span id="labelmaxgamblechance">100.00%</span> chance to get 
+                    maximum of <span id="labelmaxgamblevalue" class="label-green">234</span> value
+                </div>
+            </div>
+            <div id="strategyquestisover" style="display: none;">
+                Quest is over.
+            </div>
+            
+            <div>Predict chances with strategy: 
+                <select id="selectedstrategy" onchange="boa_solver.updateFromEventSequence();">
+                    <option value="0">Optimal</option>
+                    <option value="1">Safest</option>
+                    <option value="2">Gamble maximum</option>
+                </select>
+            </div>
+        </td>
+
+        <td>
+            <div id="eventlogcontainer">
+
+            </div>
+
+            <div style="margin: 5px; float: left;"><button id="cancellastbtn" class="btn btn-blue" onclick="boa_solver.cancelLastEvent();">CANCEL LAST</button></div>
+            <div style="margin: 5px; float: right;"><button id="exportbtn" class="btn btn-blue" onclick="boa_solver.exportLinkWithQueryParam();">COPY LINK TO CURRENT STATE</button></div>
+        </td>
+    </tr>
+</table>
+
+<table id="potiontable">
+    <tr>
+        <td style="text-align: right; vertical-align: middle;">Alchemist</td>
+        <td style="text-align: center;">Marus of Elvala</td>
+        <td style="text-align: center;">Stire of Derth</td>
+        <td style="text-align: center;">Ungrol of Last Hope</td>
+        <td style="text-align: center;">Agrimley the Hermit</td>
+    </tr>
+    <tr>
+        <td style="text-align: right; vertical-align: middle;">Elixir A</td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+    </tr>
+    <tr>
+        <td style="text-align: right; vertical-align: middle;">Elixir B </td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+    </tr>
+    <tr>
+        <td style="text-align: right; vertical-align: middle;">Elixir C </td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+    </tr>
+    <tr>
+        <td style="text-align: right; vertical-align: middle;">Final reward</td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+        <td style="vertical-align: top;"></td>
+    </tr>
+</table>
+
+<script type="text/javascript" src="main.js"></script>
+
+</div>
+
+</body>
+
+</html>
