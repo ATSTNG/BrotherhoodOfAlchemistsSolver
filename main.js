@@ -65,22 +65,22 @@ class BrotherhoodOfAlchemistsSolver {
         this.presetElixir(1, 1, "mag_wil", "Elixir of Mysticism", "+3 Magic <br> +3 Willpower");
         this.presetElixir(2, 1, "danger_sense", "Elixir of the Savior", "+4 to all saving throws");
         this.presetElixir(3, 1, "all_stat", "Elixir of Mastery", "+4 Stat points");
-        this.presetElixir(4, 1, "displacement_shield", "Elixir of Invulnerability", "");
+        this.presetElixir(4, 1, "displacement_shield", "Elixir of Invulnerability", "", "item_info_elixir_of_invulnerability.png");
 
         this.presetElixir(1, 2, "dex_cun", "Elixir of the Fox ", " +3 Dexterity <br> +3 Cunning");
         this.presetElixir(2, 2, "evasion", "Elixir of Avoidance ", " +6 Defense <br> +6 Ranged Defense");
         this.presetElixir(3, 2, "precise_strikes", "Elixir of Precision ", " +4% Physical Crit");
-        this.presetElixir(4, 2, "lifebinding_emerald", "Lifebinding Emerald", "");
+        this.presetElixir(4, 2, "lifebinding_emerald", "Lifebinding Emerald", "", "item_info_lifebinding_emerald.png");
         
         this.presetElixir(1, 3, "str_con", "Elixir of Brawn", " +3 Strength <br> +3 Constitution");
         this.presetElixir(2, 3, "armour_training", "Elixir of Stoneskin", " +4 Armour");
         this.presetElixir(3, 3, "healing_light", "Elixir of Foundations", " +2 Generic Talent points");
-        this.presetElixir(4, 3, "willful_tormenter", "Taint of Purging", "");
+        this.presetElixir(4, 3, "willful_tormenter", "Taint of Purging", "", "item_info_taint_of_purging.png");
         
         this.presetElixir(1, 4, "lightning", "Elixir of Explosive Force", " +4% Spell Crit");
         this.presetElixir(2, 4, "lucky_day", "Elixir of Serendipity", " +5 Luck");
         this.presetElixir(3, 4, "radiance", "Elixir of Focus", " +2 Class Talent points");
-        this.presetElixir(4, 4, "infusion__wild_growth", "Infusion of Wild Growth", "");
+        this.presetElixir(4, 4, "infusion__wild_growth", "Infusion of Wild Growth", "", "item_info_infusion_of_wild_growth.png");
 
         // set default values
         this.reset();
@@ -119,7 +119,7 @@ class BrotherhoodOfAlchemistsSolver {
     cell(row, col) {
         var table_cell = this.tableCell(row, col);
         
-        return table_cell.children[0];
+        return table_cell.children[1];
     }
 
     *allCells() {
@@ -417,9 +417,12 @@ class BrotherhoodOfAlchemistsSolver {
         var l_acquired_items = document.getElementById("labelacquireditems");
         var l_acquired_value = document.getElementById("labelacquiredvalue");
         var l_average_expected_value = document.getElementById("labelaverageexpectedvalue");
+        var l_average_expected_value_more = document.getElementById("labelaverageexpectedvaluemore");
         var l_min_guaranteed_value = document.getElementById("labelminguaranteedvalue");
+        var l_min_guaranteed_value_more = document.getElementById("labelminguaranteedvaluemore");
         var l_min_better_chance = document.getElementById("labelminbetterchance");
         var l_max_gamble_value = document.getElementById("labelmaxgamblevalue");
+        var l_max_gamble_value_more = document.getElementById("labelmaxgamblevaluemore");
         var l_max_gamble_chance = document.getElementById("labelmaxgamblechance");
         var c_strategy_info = document.getElementById("strategyinfocontainer");
         var c_strategy_quest_is_over = document.getElementById("strategyquestisover");
@@ -433,9 +436,12 @@ class BrotherhoodOfAlchemistsSolver {
         l_acquired_items.innerHTML = this.formatValue(this.acquired_items);
         l_acquired_value.innerHTML = `${this.acquired_value}`;
         l_average_expected_value.innerHTML = this.formatValue(this.acquired_value + dp_state.s[STRATEGY_OPTIMAL].value);
+        l_average_expected_value_more.innerHTML = this.formatValue(dp_state.s[STRATEGY_OPTIMAL].value);
         l_min_guaranteed_value.innerHTML = this.formatValue(this.acquired_value + dp_state.s[STRATEGY_SAFEST].value);
+        l_min_guaranteed_value_more.innerHTML = this.formatValue(dp_state.s[STRATEGY_SAFEST].value);
         l_min_better_chance.innerHTML = this.formatPercentage(dp_state.s[STRATEGY_SAFEST].aux_prob);
         l_max_gamble_value.innerHTML = this.formatValue(this.acquired_value + dp_state.s[STRATEGY_MAX_GAMBLE].value);
+        l_max_gamble_value_more.innerHTML = this.formatValue(dp_state.s[STRATEGY_MAX_GAMBLE].value);
         l_max_gamble_chance.innerHTML = this.formatPercentage(dp_state.s[STRATEGY_MAX_GAMBLE].aux_prob);
 
         c_strategy_info.style.display = (this.quest_is_over ? "none" : "block");
@@ -737,7 +743,7 @@ class BrotherhoodOfAlchemistsSolver {
         this.updateFromEventSequence();
     }
 
-    presetElixir(row, col, image, name, html) {
+    presetElixir(row, col, image, name, html, hover_image="empty.png") {
         var table_cell = this.tableCell(row, col);
         this.elixir_info[row][col] = {
             is_acquired: false,
@@ -753,6 +759,9 @@ class BrotherhoodOfAlchemistsSolver {
         }
 
         table_cell.innerHTML = `
+            <div style="position: absolute; display: none; transform: translate(-10%, -100%);">
+                <img src="img/${hover_image}">
+            </div>
             <div class="potion_div" style="">
                 <table>
                     <tr>
@@ -785,6 +794,11 @@ class BrotherhoodOfAlchemistsSolver {
         cell.addEventListener("mouseenter", () => {this.focusCell(row, col)});
         cell.addEventListener("mouseleave", () => {this.unfocusCells()});
 
+        if (hover_image != "empty.png") {
+            cell.addEventListener("mouseenter", () => {table_cell.children[0].style.display = "block";});
+            cell.addEventListener("mouseleave", () => {table_cell.children[0].style.display = "none";});
+        }
+
         // update first time
         this.renderCell(row, col);
     }
@@ -812,7 +826,7 @@ class BrotherhoodOfAlchemistsSolver {
         var result = `${URL}?a=${arg}`;
 
         navigator.clipboard.writeText(result).then(() => {
-            console.log('[CLIPBOARD] copy successful: ' + arg);
+            alert('Copy successful. Link: ' + arg);
           },() => {
             alert('Failed to copy to clipboard. Link: ' + arg);
           });

@@ -107,6 +107,7 @@ h1 {
     text-decoration: none;
     display: inline-block;
     height: 24px;
+    cursor: pointer;
 }
 
 .btn-action {
